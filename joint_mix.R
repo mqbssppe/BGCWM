@@ -88,10 +88,10 @@ blockGLasso_mix <- function (X, z, mu, mu0, K,
 			}
 		}
 		if(max(Sigma_New[,,k]) > 1e+6 ){
-			if(verbose){
-				cat(paste0('[WARNING] generated Sigma matrix for component: ', k, ' too large.'),'\n')
-				cat(paste0('        the number of assigned observations is: ', length(ind), '.'),'\n')
-			}
+#			if(verbose){
+#				cat(paste0('[WARNING] generated Sigma matrix for component: ', k, ' too large.'),'\n')
+#				cat(paste0('        the number of assigned observations is: ', length(ind), '.'),'\n')
+#			}
 			Sigma_New[,,k] = matrix(0,p,p)
 			diag(Sigma_New[,,k]) <- runif(1)*diag(var(X))
 		}
