@@ -62,7 +62,7 @@ blockGLasso_mix <- function (X, z, mu, mu0, K,
 		tau[upper.tri(tau)] <- t(tau)[upper.tri(t(tau))]
 		#***********************************************************************		
 		for (i in 1:p) {
-			tauI <- tau[perms[, i], i]
+			tauI <- as.matrix(tau[perms[, i], i])
 			Sigma11 <- Sigma_New[perms[, i], perms[, i], k]
 			Sigma12 <- Sigma_New[perms[, i], i, k]
 			S21 <- S_k[i, perms[, i]]
