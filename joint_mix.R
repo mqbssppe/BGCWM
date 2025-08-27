@@ -1269,5 +1269,44 @@ telescoping_sampler <- function(x_data, y_data, mcmc_iter = 2000, thin = 10, K_m
 	}
 
 
+# fit: object returned by telescoping sampler
+# newdata: matrix-like object with same columns as X 
+predict.bgcwm <- function(fit, newdata, alpha = 0.05, burn = 0.1){
+
+	nIter <- length(fit$nClusters)
+	burn <- floor(length(fit$nClusters)/burn^{-1})
+	iter <- burn + 1
+	res = c()
+	for(j in 1:dim(newdata)[1]){
+		y_new <- numeric(nIter - burn)
+		for(iter in (burn+1):nIter){
+			K <- fit$nClusters[iter]
+			w <- fit$pr[iter,1:K]
+			mu <- fit$mu[iter, ,1:K]
+			SIGMA <- fit$SIGMA[iter,,,1:K]
+	#		sample z = k|x,...
+			probs <- numeric(K)
+			for(k in 1:K){
+				probs[k] = w[k] * mvtnorm::dmvnorm(x = newdata[j,], mean = mu[,k], sigma = SIGMA[,,k])
+			}
+			k <- sample(1:K, 1, prob = probs)
+	#		sample y|x, z = k,...		
+			s2 <- fit$sigma[iter, k]
+			b <- fit$beta[iter, , k]
+			a <- fit$alpha[iter, k]
+			cond.mean <- a + t(b) %*% newdata[j,]
+			y_new[iter - burn] <- rnorm(1, mean = cond.mean, sd = sqrt(s2))		
+		}
+		y.pred <- mean(y_new)	
+		y.low <- quantile(y_new, probs = alpha/2)
+		y.up <- quantile(y_new, probs = 1 - alpha/2)
+		res <- rbind(res, c(y.pred, y.low, y.up))
+		cat(paste0("Calculating model predictions for new observation: ", j,'.'),'                 \r')
+	}
+	cat('\n')
+	colnames(res)[1] <- 'Estimate'
+	return(res)
+}
+
 
 
