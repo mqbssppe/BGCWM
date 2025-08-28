@@ -674,7 +674,7 @@ initialize_sampler <- function(x_data, y_data, mcmc_iter = 30, thin = 1, K_max,
 
 	initial_values$z <- init@cluster
 	
-        myRuns <- telescoping_sampler(x_data = X, y_data = y, mcmc_iter = mcmc_iter, thin = thin, K_max = K_max,
+        myRuns <- telescoping_sampler(x_data = x_data, y_data = y_data, mcmc_iter = mcmc_iter, thin = thin, K_max = K_max,
                         r = r,                  
                         s = s,
                         sigma2_alpha = sigma2_alpha,
@@ -709,7 +709,7 @@ initialize_sampler <- function(x_data, y_data, mcmc_iter = 30, thin = 1, K_max,
 		initial_values <- vector('list', length = 1)
 
 		initial_values$z <- init@cluster
-		myRuns <- telescoping_sampler(x_data = X, y_data = y, mcmc_iter = mcmc_iter, thin = thin, K_max = K_max,
+		myRuns <- telescoping_sampler(x_data = x_data, y_data = y_data, mcmc_iter = mcmc_iter, thin = thin, K_max = K_max,
 			        r = r,                  
 			        s = s,
 			        sigma2_alpha = sigma2_alpha,
