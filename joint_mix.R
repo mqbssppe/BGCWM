@@ -1279,6 +1279,7 @@ predict.bgcwm <- function(fit, newdata, alpha = 0.05, burn = 0.1){
 	res = c()
 	for(j in 1:dim(newdata)[1]){
 		y_new <- numeric(nIter - burn)
+		z_new <- numeric(nIter - burn)
 		for(iter in (burn+1):nIter){
 			K <- fit$nClusters[iter]
 			w <- fit$pr[iter,1:K]
@@ -1290,6 +1291,7 @@ predict.bgcwm <- function(fit, newdata, alpha = 0.05, burn = 0.1){
 				probs[k] = w[k] * mvtnorm::dmvnorm(x = newdata[j,], mean = mu[,k], sigma = SIGMA[,,k])
 			}
 			k <- sample(1:K, 1, prob = probs)
+			z_new[iter - burn] <- k
 	#		sample y|x, z = k,...		
 			s2 <- fit$sigma[iter, k]
 			b <- fit$beta[iter, , k]
@@ -1297,14 +1299,24 @@ predict.bgcwm <- function(fit, newdata, alpha = 0.05, burn = 0.1){
 			cond.mean <- a + t(b) %*% newdata[j,]
 			y_new[iter - burn] <- rnorm(1, mean = cond.mean, sd = sqrt(s2))		
 		}
+		
 		y.pred <- mean(y_new)	
 		y.low <- quantile(y_new, probs = alpha/2)
 		y.up <- quantile(y_new, probs = 1 - alpha/2)
-		res <- rbind(res, c(y.pred, y.low, y.up))
+		
+		d <- density(y_new)
+		modes_idx <- which(diff(sign(diff(d$y))) == -2) + 1
+		modes <- d$x[modes_idx]
+		main_mode <- modes[which.max(d$y[modes_idx])]
+#		map1 <- as.numeric(which.max(table(z_new)))
+#		map1 <- modes[map1]
+#		k <- sample(K, 1, prob =as.numeric(table(z_new)))
+#		est1 <- modes[k]
+		res <- rbind(res, c(y.pred, y.low, y.up, main_mode))
 		cat(paste0("Calculating model predictions for new observation: ", j,'.'),'                 \r')
 	}
 	cat('\n')
-	colnames(res)[1] <- 'Estimate'
+	colnames(res)[c(1,4)] <- c('posterior_mean', 'map')
 	return(res)
 }
 
